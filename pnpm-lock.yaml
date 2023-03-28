@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   sass: ^1.60.0
-  simulationjs: ^3.6.0
+  simulationjs: ^3.7.1
   solid-js: ^1.6.10
   typescript: ^4.9.5
   vite: ^4.1.1
@@ -10,7 +10,7 @@ specifiers:
 
 dependencies:
   sass: 1.60.0
-  simulationjs: 3.6.0
+  simulationjs: 3.7.1
   solid-js: 1.6.10
 
 devDependencies:
@@ -915,8 +915,8 @@ packages:
     hasBin: true
     dev: true
 
-  /simulationjs/3.6.0:
-    resolution: {integrity: sha512-xr+B5tdhBdEvk1u92U7KOOwUgcPDrXpzvMIxx7sd1TaHV+szfd6+hpYlmyz2LS5wOuuW+3CD3ghBxwZkjzbjEw==}
+  /simulationjs/3.7.1:
+    resolution: {integrity: sha512-6wKL7tsR53tE8YjcUTXIgoLkXIp2mlr8ImZGoDYnMulVHX/YMAdH2XGCzVC5msAUQl8BOAb3M/ZdCa74HzLshQ==}
     dev: false
 
   /solid-js/1.6.10:

@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "sass": "^1.60.0",
-    "simulationjs": "^3.6.0",
+    "simulationjs": "^3.7.1",
     "solid-js": "^1.6.10"
   }
 }

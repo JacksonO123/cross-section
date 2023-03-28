@@ -1,7 +1,7 @@
 import { Component, onMount, createSignal } from 'solid-js';
 import {
+  Camera,
   Color,
-  Cube,
   distance3d,
   frameLoop,
   Line3d,
@@ -24,7 +24,7 @@ const App: Component = () => {
   const [function2, setFunction2] = createSignal('(x)^2');
   const [intervalStart, setIntervalStart] = createSignal(-2);
   const [intervalEnd, setIntervalEnd] = createSignal(3);
-  const [inc, setInc] = createSignal(0.2);
+  const [inc, setInc] = createSignal(0.5);
   const [focusing, setFocusing] = createSignal(false);
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
@@ -65,7 +65,8 @@ const App: Component = () => {
       .replace(/sin/g, '')
       .replace(/cos/g, '')
       .replace(/tan/g, '')
-      .replace(/sqrt/g, '');
+      .replace(/sqrt/g, '')
+      .replace(/log/g, '');
     const validChars = [
       '1',
       '2',
@@ -110,7 +111,8 @@ const App: Component = () => {
       .replace(/arcsin/g, 'Math.asin')
       .replace(/arccos/g, 'Math.acos')
       .replace(/arctan/g, 'Math.atan')
-      .replace(/sqrt/g, 'Math.sqrt');
+      .replace(/sqrt/g, 'Math.sqrt')
+      .replace(/log/g, 'Math.log');
   };
 
   const toVec3 = (vec: Vector, z: number) => {
@@ -175,8 +177,15 @@ const App: Component = () => {
       eval(`func1Val = ${func1}`);
       eval(`func2Val = ${func2}`);
 
-      const diff = func1Val - func2Val;
-      const pos = diff / 2 - func1Val;
+      let diff = 0;
+      let pos = 0;
+      if (func2Val < func1Val) {
+        diff = func1Val - func2Val;
+        pos = diff / 2 - func1Val;
+      } else {
+        diff = func2Val - func1Val;
+        pos = diff / 2 - func2Val;
+      }
       const plane = new Plane(
         new Vector3(currentVal, pos, 0),
         [
@@ -195,24 +204,47 @@ const App: Component = () => {
     }
   };
 
+  const planeSortFunc = (planes: Plane[], cam: Camera) => {
+    return planes.sort((a, b) => {
+      const aPos = new Vector3(a.pos.x, a.pos.y, 0);
+      const aDist = distance3d(aPos, cam.pos);
+      const bPos = new Vector3(b.pos.x, b.pos.y, 0);
+      const bDist = distance3d(bPos, cam.pos);
+      return bDist - aDist;
+    });
+  };
+
   onMount(() => {
     canvas = new Simulation(canvasRef, new Vector3(0, 0, -50));
     canvas.fitElement();
+    canvas.setSortFunc(planeSortFunc);
 
-    const xAxis = new Line3d(
-      new Vector3(-graphWidth / 2, 0, 0),
-      new Vector3(graphWidth / 2, 0, 0),
-      new Color(0, 0, 0),
-      2
-    );
+    const axisSplit = 100;
+    const axisIncX = graphWidth / axisSplit;
+    const axisIncY = graphHeight / axisSplit;
+
+    const xAxis = new SceneCollection('x-axis');
+    for (let i = 0; i < axisSplit; i++) {
+      const axisLine = new Line3d(
+        new Vector3(-graphWidth / 2 + axisIncX * i, 0, 0),
+        new Vector3(-graphWidth / 2 + axisIncY * (i + 1), 0, 0),
+        new Color(0, 0, 0),
+        2
+      );
+      xAxis.add(axisLine);
+    }
     canvas.add(xAxis);
 
-    const yAxis = new Line3d(
-      new Vector3(0, -graphHeight / 2, 0),
-      new Vector3(0, graphHeight / 2, 0),
-      new Color(0, 0, 0),
-      2
-    );
+    const yAxis = new SceneCollection('x-axis');
+    for (let i = 0; i < axisSplit; i++) {
+      const axisLine = new Line3d(
+        new Vector3(0, -graphHeight / 2 + axisIncY * i, 0),
+        new Vector3(0, -graphHeight / 2 + axisIncY * (i + 1), 0),
+        new Color(0, 0, 0),
+        2
+      );
+      yAxis.add(axisLine);
+    }
     canvas.add(yAxis);
 
     graphs = new SceneCollection('graphs');
