@@ -177,6 +177,8 @@ const App: Component = () => {
       eval(`func1Val = ${func1}`);
       eval(`func2Val = ${func2}`);
 
+      console.log(func1Val, func2Val);
+
       let diff = 0;
       let pos = 0;
       if (func2Val < func1Val) {
