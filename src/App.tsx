@@ -2,6 +2,7 @@ import { Component, onMount, createSignal } from 'solid-js';
 import {
   Color,
   Cube,
+  distance3d,
   frameLoop,
   Line3d,
   Plane,
@@ -281,8 +282,10 @@ const App: Component = () => {
       }
     });
 
-    const speed = 0.2;
+    let speed = 0;
+    const speedDampen = 150;
     frameLoop(() => {
+      speed = canvas.camera.pos.clone().divide(speedDampen).getMag();
       if (pressingW) {
         canvas.moveCamera(
           new Vector3(
@@ -333,6 +336,7 @@ const App: Component = () => {
       {/* @ts-ignore */}
       <canvas ref={canvasRef} />
       <div class="controls">
+        <h4>Functions</h4>
         <input
           placeholder="Function 1"
           value={function1()}
