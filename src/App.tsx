@@ -171,8 +171,17 @@ const App: Component = () => {
       let func1 = replaceVars(function1(), currentVal);
       let func2 = replaceVars(function2(), currentVal);
 
-      let func1Val = 0;
-      let func2Val = 0;
+      /*
+        when minimized, transpiler knows initial
+        value of variables, but since we set a new
+        value in an eval, it does not know that it
+        changes, and predicts the outcome of the condition
+        and removes the if statement, random creates
+        uncertainty in the difference between values
+        while also defining them
+      */
+      let func1Val = Math.random();
+      let func2Val = Math.random();
 
       eval(`func1Val = ${func1}`);
       eval(`func2Val = ${func2}`);
