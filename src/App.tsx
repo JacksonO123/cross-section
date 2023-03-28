@@ -330,40 +330,16 @@ const App: Component = () => {
     frameLoop(() => {
       speed = canvas.camera.pos.clone().divide(speedDampen).getMag();
       if (pressingW) {
-        canvas.moveCamera(
-          new Vector3(
-            Math.sin(canvas.camera.rot.y) * Math.cos(canvas.camera.rot.x) * speed,
-            0,
-            Math.cos(canvas.camera.rot.y) * Math.cos(canvas.camera.rot.x) * speed
-          )
-        );
+        canvas.moveCamera(canvas.forward.clone().multiply(speed));
       }
       if (pressingA) {
-        canvas.moveCamera(
-          new Vector3(
-            -Math.sin(canvas.camera.rot.y + Math.PI / 2) * speed,
-            0,
-            -Math.cos(canvas.camera.rot.y + Math.PI / 2) * speed
-          )
-        );
+        canvas.moveCamera(canvas.left.clone().multiply(speed));
       }
       if (pressingS) {
-        canvas.moveCamera(
-          new Vector3(
-            -Math.sin(canvas.camera.rot.y) * Math.cos(canvas.camera.rot.x) * speed,
-            0,
-            -Math.cos(canvas.camera.rot.y) * Math.cos(canvas.camera.rot.x) * speed
-          )
-        );
+        canvas.moveCamera(canvas.backward.clone().multiply(speed));
       }
       if (pressingD) {
-        canvas.moveCamera(
-          new Vector3(
-            Math.sin(canvas.camera.rot.y + Math.PI / 2) * speed,
-            0,
-            Math.cos(canvas.camera.rot.y + Math.PI / 2) * speed
-          )
-        );
+        canvas.moveCamera(canvas.right.clone().multiply(speed));
       }
       if (pressingSpace) {
         canvas.moveCamera(new Vector3(0, -speed, 0));
