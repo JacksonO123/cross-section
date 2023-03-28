@@ -23,6 +23,7 @@ const App: Component = () => {
   const [function2, setFunction2] = createSignal('(x)^2');
   const [intervalStart, setIntervalStart] = createSignal(-2);
   const [intervalEnd, setIntervalEnd] = createSignal(3);
+  const [inc, setInc] = createSignal(0.2);
   const [focusing, setFocusing] = createSignal(false);
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
@@ -49,6 +50,10 @@ const App: Component = () => {
 
   const changeIntervalEnd = (e: InputChange) => {
     setIntervalEnd(+e.currentTarget.value);
+  };
+
+  const changeInc = (e: InputChange) => {
+    setInc(+e.currentTarget.value);
   };
 
   const isValidFunc = (func: string) => {
@@ -158,7 +163,6 @@ const App: Component = () => {
 
   const graphCrossSection = () => {
     crossSections.empty();
-    const inc = 0.5;
     let currentVal = intervalStart();
     while (currentVal < intervalEnd()) {
       let func1 = replaceVars(function1(), currentVal);
@@ -186,7 +190,7 @@ const App: Component = () => {
       );
       crossSections.add(plane);
 
-      currentVal += inc;
+      currentVal += inc();
     }
   };
 
@@ -277,7 +281,7 @@ const App: Component = () => {
       }
     });
 
-    const speed = 0.5;
+    const speed = 0.2;
     frameLoop(() => {
       if (pressingW) {
         canvas.moveCamera(
@@ -345,7 +349,7 @@ const App: Component = () => {
         />
         <button onClick={graph}>Graph</button>
         <h4>Interval</h4>
-        <div class="interval-input">
+        <div class="input-group">
           <input
             placeholder="Start"
             value={intervalStart()}
@@ -361,6 +365,14 @@ const App: Component = () => {
             onBlur={() => setFocusing(false)}
           />
         </div>
+        <h4>Cross section increment</h4>
+        <input
+          placeholder="Increment"
+          value={inc()}
+          onChange={changeInc}
+          onFocus={() => setFocusing(true)}
+          onBlur={() => setFocusing(false)}
+        />
         <button onClick={graphCrossSection}>Graph cross section</button>
       </div>
     </div>
