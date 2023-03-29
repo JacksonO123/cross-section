@@ -374,6 +374,15 @@ const App: Component = () => {
       <canvas ref={canvasRef} />
       <div class="controls">
         <span>By Jackson Otto</span>
+        <h4>Directions</h4>
+        <span>
+          <ul>
+            <li>
+              Press <code>W</code> <code>A</code> <code>S</code> <code>D</code> to move camera around
+            </li>
+            <li>Click and drag to look around</li>
+          </ul>
+        </span>
         <h4>Functions</h4>
         <input
           placeholder="Function 1"
