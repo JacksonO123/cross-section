@@ -7,6 +7,7 @@ import {
   Line3d,
   Plane,
   radToDeg,
+  randInt,
   SceneCollection,
   Simulation,
   Vector,
@@ -24,7 +25,7 @@ const App: Component = () => {
   const [function2, setFunction2] = createSignal('x^2');
   const [intervalStart, setIntervalStart] = createSignal(-2);
   const [intervalEnd, setIntervalEnd] = createSignal(3);
-  const [inc, setInc] = createSignal(0.2);
+  const [inc, setInc] = createSignal(0.05);
   const [focusing, setFocusing] = createSignal(false);
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
@@ -207,6 +208,8 @@ const App: Component = () => {
           new Vector3(0, diff / 2, 0)
         ],
         new Color(79, 13, 153, 0.25),
+        // new Color(25, 118, 210, 0.25),
+        // new Color(randInt(255), randInt(255), randInt(255), 0.25),
         true,
         true
       );
@@ -218,9 +221,9 @@ const App: Component = () => {
 
   const planeSortFunc = (planes: Plane[], cam: Camera) => {
     return planes.sort((a, b) => {
-      const aPos = new Vector3(a.pos.x, a.pos.y, 0);
+      const aPos = new Vector3(a.pos.x, 0, 0);
       const aDist = distance3d(aPos, cam.pos);
-      const bPos = new Vector3(b.pos.x, b.pos.y, 0);
+      const bPos = new Vector3(b.pos.x, 0, 0);
       const bDist = distance3d(bPos, cam.pos);
       return bDist - aDist;
     });
