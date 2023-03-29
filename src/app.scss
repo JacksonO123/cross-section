@@ -58,7 +58,7 @@ h4 {
 
 code {
   background: rgba(175, 175, 175, 0.35);
-  padding: 1px 4px;
+  padding: 0 4px;
   border-radius: 2px;
   text-align: center;
 }
@@ -68,9 +68,6 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  li {
-    line-height: 1.5rem;
-  }
 }
 
 .select-btn {
