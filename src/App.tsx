@@ -176,7 +176,7 @@ const App: Component = () => {
       let func2 = replaceVars(function2(), currentVal);
 
       /*
-        when minimized, transpiler knows initial
+        when minimized, minifier knows initial
         value of variables, but since we set a new
         value in an eval, it does not know that it
         changes, and predicts the outcome of the condition
@@ -275,6 +275,12 @@ const App: Component = () => {
 
     crossSections = new SceneCollection('cross-sections');
     canvas.add(crossSections);
+
+    graph();
+    graphCrossSection();
+
+    canvas.moveCamera(new Vector3(-graphWidth / 4, -graphHeight / 4, 0), 1);
+    canvas.rotateCamera(new Vector3(-25, 30, 0), 1);
 
     let pressingW = false;
     let pressingA = false;
