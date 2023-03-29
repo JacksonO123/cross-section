@@ -21,10 +21,10 @@ type InputChange = Event & {
 
 const App: Component = () => {
   const [function1, setFunction1] = createSignal('x+6');
-  const [function2, setFunction2] = createSignal('(x)^2');
+  const [function2, setFunction2] = createSignal('x^2');
   const [intervalStart, setIntervalStart] = createSignal(-2);
   const [intervalEnd, setIntervalEnd] = createSignal(3);
-  const [inc, setInc] = createSignal(0.5);
+  const [inc, setInc] = createSignal(0.2);
   const [focusing, setFocusing] = createSignal(false);
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
@@ -66,7 +66,8 @@ const App: Component = () => {
       .replace(/cos/g, '')
       .replace(/tan/g, '')
       .replace(/sqrt/g, '')
-      .replace(/log/g, '');
+      .replace(/log/g, '')
+      .replace(/pi/g, '');
     const validChars = [
       '1',
       '2',
@@ -103,7 +104,8 @@ const App: Component = () => {
   const replaceVars = (func: string, val: number) => {
     return func
       .replace(/e/g, Math.E + '')
-      .replace(/x/g, val + '')
+      .replace(/pi/g, Math.PI + '')
+      .replace(/x/g, `(${val})`)
       .replace(/\^/g, '**')
       .replace(/(?<!arc)sin/g, 'Math.sin')
       .replace(/(?<!arc)cos/g, 'Math.cos')
@@ -133,6 +135,7 @@ const App: Component = () => {
   };
 
   const graph = () => {
+    clearCrossSection();
     const func1Valid = isValidFunc(function1());
     const func2Valid = isValidFunc(function2());
     const sections = 2000;
