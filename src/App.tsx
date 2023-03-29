@@ -2,12 +2,12 @@ import { Component, onMount, createSignal, createEffect } from 'solid-js';
 import {
   Camera,
   Color,
+  degToRad,
   distance3d,
   frameLoop,
   Line3d,
   Plane,
   radToDeg,
-  randInt,
   SceneCollection,
   Simulation,
   Vector,
@@ -20,7 +20,7 @@ type InputChange = Event & {
   target: Element;
 };
 
-type CrossSectionTypes = 'square' | 'triangle';
+type CrossSectionTypes = 'square' | 'triangle' | 'semicircle';
 
 const App: Component = () => {
   const [function1, setFunction1] = createSignal('x+6');
@@ -32,7 +32,7 @@ const App: Component = () => {
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
   const [crossSectionType, setCrossSectionType] = createSignal<CrossSectionTypes>('square');
-  const crossSectionOptions: CrossSectionTypes[] = ['square', 'triangle'];
+  const crossSectionOptions: CrossSectionTypes[] = ['square', 'triangle', 'semicircle'];
 
   let canvasRef: HTMLCanvasElement;
   let canvas: Simulation;
@@ -239,6 +239,27 @@ const App: Component = () => {
           true
         );
         crossSections.add(plane);
+      } else if (crossSectionType() === 'semicircle') {
+        const getSemiCirclePoints = (radius: number) => {
+          const res: Vector3[] = [];
+          const sections = 20;
+          let rotation = 90;
+          for (let i = 0; i < sections + 1; i++) {
+            const y = Math.sin(degToRad(rotation)) * radius;
+            const z = Math.cos(degToRad(rotation)) * radius;
+            const point = new Vector3(0, y, z);
+            res.push(point);
+            rotation += 180 / sections;
+          }
+          return res;
+        };
+        const points = [
+          new Vector3(0, -diff / 2, 0),
+          ...getSemiCirclePoints(diff / 2),
+          new Vector3(0, diff / 2, 0)
+        ];
+        const plane = new Plane(new Vector3(currentVal, pos, 0), points, color, true, true);
+        crossSections.add(plane);
       }
 
       currentVal += inc();
@@ -410,6 +431,7 @@ const App: Component = () => {
               Press <code>Space</code> To move up, and <code>Shift</code> to move down
             </li>
             <li>Click and drag to look around</li>
+            <li>Some functions may not be implemented</li>
           </ul>
         </span>
         <h4>Functions</h4>
@@ -471,6 +493,9 @@ const App: Component = () => {
             </button>
           ))}
         </div>
+        {crossSectionType() === 'semicircle' && (
+          <span>Warning: Calculating a large interval may effect performance</span>
+        )}
       </div>
     </div>
   );

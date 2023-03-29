@@ -16,6 +16,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 300px;
   }
 }
 
@@ -25,7 +26,7 @@ input {
   outline: none;
   border: 1px solid rgb(125, 125, 125);
   font-size: 17px;
-  min-width: none;
+  min-width: 0;
 }
 
 button {
@@ -35,7 +36,6 @@ button {
   cursor: pointer;
   transition: 0.15s;
   width: 100%;
-  white-space: nowrap;
   &:hover {
     background: #dddddd;
   }
@@ -68,6 +68,9 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  li {
+    line-height: 1.5rem;
+  }
 }
 
 .select-btn {
