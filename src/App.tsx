@@ -1,4 +1,4 @@
-import { Component, onMount, createSignal } from 'solid-js';
+import { Component, onMount, createSignal, createEffect } from 'solid-js';
 import {
   Camera,
   Color,
@@ -20,6 +20,8 @@ type InputChange = Event & {
   target: Element;
 };
 
+type CrossSectionTypes = 'square' | 'triangle';
+
 const App: Component = () => {
   const [function1, setFunction1] = createSignal('x+6');
   const [function2, setFunction2] = createSignal('x^2');
@@ -29,6 +31,8 @@ const App: Component = () => {
   const [focusing, setFocusing] = createSignal(false);
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
+  const [crossSectionType, setCrossSectionType] = createSignal<CrossSectionTypes>('square');
+  const crossSectionOptions: CrossSectionTypes[] = ['square', 'triangle'];
 
   let canvasRef: HTMLCanvasElement;
   let canvas: Simulation;
@@ -56,6 +60,13 @@ const App: Component = () => {
 
   const changeInc = (e: InputChange) => {
     setInc(+e.currentTarget.value);
+  };
+
+  const handleCrossSectionType = (val: CrossSectionTypes) => {
+    setCrossSectionType(val);
+    if (crossSections.scene.length > 0) {
+      graphCrossSection();
+    }
   };
 
   const isValidFunc = (func: string) => {
@@ -199,21 +210,36 @@ const App: Component = () => {
         diff = func2Val - func1Val;
         pos = diff / 2 - func2Val;
       }
-      const plane = new Plane(
-        new Vector3(currentVal, pos, 0),
-        [
-          new Vector3(0, diff / 2, -diff),
-          new Vector3(0, -diff / 2, -diff),
-          new Vector3(0, -diff / 2, 0),
-          new Vector3(0, diff / 2, 0)
-        ],
-        new Color(79, 13, 153, 0.25),
-        // new Color(25, 118, 210, 0.25),
-        // new Color(randInt(255), randInt(255), randInt(255), 0.25),
-        true,
-        true
-      );
-      crossSections.add(plane);
+      const color = new Color(79, 13, 153, 0.25);
+
+      if (crossSectionType() === 'square') {
+        const plane = new Plane(
+          new Vector3(currentVal, pos, 0),
+          [
+            new Vector3(0, diff / 2, -diff),
+            new Vector3(0, -diff / 2, -diff),
+            new Vector3(0, -diff / 2, 0),
+            new Vector3(0, diff / 2, 0)
+          ],
+          color,
+          true,
+          true
+        );
+        crossSections.add(plane);
+      } else if (crossSectionType() === 'triangle') {
+        const plane = new Plane(
+          new Vector3(currentVal, pos, 0),
+          [
+            new Vector3(0, -diff / 2, 0),
+            new Vector3(0, diff / 2, 0),
+            new Vector3(0, 0, -((diff * Math.sqrt(3)) / 2))
+          ],
+          color,
+          true,
+          true
+        );
+        crossSections.add(plane);
+      }
 
       currentVal += inc();
     }
@@ -380,6 +406,9 @@ const App: Component = () => {
             <li>
               Press <code>W</code> <code>A</code> <code>S</code> <code>D</code> to move camera around
             </li>
+            <li>
+              Press <code>Space</code> To move up, and <code>Shift</code> to move down
+            </li>
             <li>Click and drag to look around</li>
           </ul>
         </span>
@@ -430,6 +459,17 @@ const App: Component = () => {
         <div class="input-group">
           <button onClick={graphCrossSection}>Graph cross section</button>
           <button onClick={clearCrossSection}>Clear cross section</button>
+        </div>
+        <h4>Cross section type</h4>
+        <div class="input-group">
+          {crossSectionOptions.map((item) => (
+            <button
+              style={crossSectionType() === item ? { background: 'rgba(79, 13, 153, 0.25)' } : {}}
+              onClick={() => handleCrossSectionType(item)}
+            >
+              {item}
+            </button>
+          ))}
         </div>
       </div>
     </div>
