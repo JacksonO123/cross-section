@@ -139,7 +139,7 @@ const App: Component = () => {
     clearCrossSection();
     const func1Valid = isValidFunc(function1());
     const func2Valid = isValidFunc(function2());
-    const sections = 2000;
+    const sections = 2500;
     const inc = graphWidth / sections;
 
     let func1Points: Vector[] = [];
@@ -171,7 +171,7 @@ const App: Component = () => {
   const graphCrossSection = () => {
     crossSections.empty();
     let currentVal = intervalStart();
-    while (currentVal < intervalEnd()) {
+    while (currentVal < intervalEnd() && inc() > 0) {
       let func1 = replaceVars(function1(), currentVal);
       let func2 = replaceVars(function2(), currentVal);
 
