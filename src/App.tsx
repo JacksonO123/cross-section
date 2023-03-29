@@ -186,8 +186,6 @@ const App: Component = () => {
       eval(`func1Val = ${func1}`);
       eval(`func2Val = ${func2}`);
 
-      console.log(func1Val, func2Val);
-
       let diff = 0;
       let pos = 0;
       if (func2Val < func1Val) {
@@ -223,6 +221,14 @@ const App: Component = () => {
       const bDist = distance3d(bPos, cam.pos);
       return bDist - aDist;
     });
+  };
+
+  const clearGraph = () => {
+    graphs.empty();
+  };
+
+  const clearCrossSection = () => {
+    crossSections.empty();
   };
 
   onMount(() => {
@@ -326,7 +332,7 @@ const App: Component = () => {
     });
 
     let speed = 0;
-    const speedDampen = 150;
+    const speedDampen = 175;
     frameLoop(() => {
       speed = canvas.camera.pos.clone().divide(speedDampen).getMag();
       if (pressingW) {
@@ -370,7 +376,10 @@ const App: Component = () => {
           onFocus={() => setFocusing(true)}
           onBlur={() => setFocusing(false)}
         />
-        <button onClick={graph}>Graph</button>
+        <div class="input-group">
+          <button onClick={graph}>Graph</button>
+          <button onClick={clearGraph}>Clear graph</button>
+        </div>
         <h4>Interval</h4>
         <div class="input-group">
           <input
@@ -396,7 +405,10 @@ const App: Component = () => {
           onFocus={() => setFocusing(true)}
           onBlur={() => setFocusing(false)}
         />
-        <button onClick={graphCrossSection}>Graph cross section</button>
+        <div class="input-group">
+          <button onClick={graphCrossSection}>Graph cross section</button>
+          <button onClick={clearCrossSection}>Clear cross section</button>
+        </div>
       </div>
     </div>
   );

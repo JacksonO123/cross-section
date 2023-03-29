@@ -34,6 +34,8 @@ button {
   border: none;
   cursor: pointer;
   transition: 0.15s;
+  width: 100%;
+  white-space: nowrap;
   &:hover {
     background: #dddddd;
   }
