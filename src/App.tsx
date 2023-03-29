@@ -364,6 +364,7 @@ const App: Component = () => {
       {/* @ts-ignore */}
       <canvas ref={canvasRef} />
       <div class="controls">
+        <span>By Jackson Otto</span>
         <h4>Functions</h4>
         <input
           placeholder="Function 1"
