@@ -494,7 +494,7 @@ const App: Component = () => {
           ))}
         </div>
         {crossSectionType() === 'semicircle' && (
-          <span>Warning: Calculating a large interval may effect performance</span>
+          <span>Warning: Calculating a large interval may affect performance</span>
         )}
       </div>
     </div>
