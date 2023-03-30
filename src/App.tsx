@@ -15,14 +15,17 @@ import {
 } from 'simulationjs';
 import './app.scss';
 
-type InputChange = Event & {
-  currentTarget: HTMLInputElement;
+type InputChange<T = HTMLInputElement> = Event & {
+  currentTarget: T;
   target: Element;
 };
 
 type CrossSectionTypes = 'square' | 'triangle' | 'semicircle';
 
+type FuncType = 'x' | 'y';
+
 const App: Component = () => {
+  const [inTermsOf, setInTermsOf] = createSignal<FuncType>('x');
   const [function1, setFunction1] = createSignal('x+6');
   const [function2, setFunction2] = createSignal('x^2');
   const [intervalStart, setIntervalStart] = createSignal(-2);
@@ -41,6 +44,24 @@ const App: Component = () => {
 
   const graphWidth = 120;
   const graphHeight = 120;
+
+  const changeInTermsOf = (e: InputChange<HTMLSelectElement>) => {
+    const val = e.currentTarget.value as FuncType;
+
+    setInTermsOf(val);
+
+    if (val === 'x') {
+      setFunction1(function1().replace(/y/g, 'x'));
+      setFunction2(function2().replace(/y/g, 'x'));
+      canvas.setSortFunc(planeSortFuncX);
+    } else {
+      setFunction1(function1().replace(/x/g, 'y'));
+      setFunction2(function2().replace(/x/g, 'y'));
+      canvas.setSortFunc(planeSortFuncY);
+    }
+    graph();
+    graphCrossSection();
+  };
 
   const changeFunction1 = (e: InputChange) => {
     setFunction1(e.currentTarget.value);
@@ -80,7 +101,7 @@ const App: Component = () => {
       .replace(/sqrt/g, '')
       .replace(/log/g, '')
       .replace(/pi/g, '');
-    const validChars = [
+    let validChars = [
       '1',
       '2',
       '3',
@@ -92,7 +113,6 @@ const App: Component = () => {
       '9',
       '0',
       'e',
-      'x',
       '(',
       ')',
       '.',
@@ -103,6 +123,9 @@ const App: Component = () => {
       '+',
       ' '
     ];
+
+    validChars.push(inTermsOf());
+
     const chars = func.split('');
     for (let i = 0; i < chars.length; i++) {
       if (!validChars.includes(chars[i])) {
@@ -118,6 +141,7 @@ const App: Component = () => {
       .replace(/e/g, Math.E + '')
       .replace(/pi/g, Math.PI + '')
       .replace(/x/g, `(${val})`)
+      .replace(/y/g, `(${val})`)
       .replace(/\^/g, '**')
       .replace(/(?<!arc)sin/g, 'Math.sin')
       .replace(/(?<!arc)cos/g, 'Math.cos')
@@ -168,8 +192,13 @@ const App: Component = () => {
         eval(`func1Val = ${func1}`);
         eval(`func2Val = ${func2}`);
 
-        func1Points.push(new Vector(currentVal, -func1Val));
-        func2Points.push(new Vector(currentVal, -func2Val));
+        if (inTermsOf() === 'x') {
+          func1Points.push(new Vector(currentVal, -func1Val));
+          func2Points.push(new Vector(currentVal, -func2Val));
+        } else {
+          func1Points.push(new Vector(func1Val, -currentVal));
+          func2Points.push(new Vector(func2Val, -currentVal));
+        }
 
         currentVal += inc;
       }
@@ -210,34 +239,52 @@ const App: Component = () => {
         diff = func2Val - func1Val;
         pos = diff / 2 - func2Val;
       }
+
       const color = new Color(79, 13, 153, 0.25);
 
       if (crossSectionType() === 'square') {
-        const plane = new Plane(
-          new Vector3(currentVal, pos, 0),
-          [
+        let points: Vector3[] = [];
+        let planePos = new Vector3(currentVal, pos, 0);
+
+        if (inTermsOf() === 'x') {
+          points = [
             new Vector3(0, diff / 2, -diff),
             new Vector3(0, -diff / 2, -diff),
             new Vector3(0, -diff / 2, 0),
             new Vector3(0, diff / 2, 0)
-          ],
-          color,
-          true,
-          true
-        );
+          ];
+        } else {
+          points = [
+            new Vector3(diff / 2, 0, -diff),
+            new Vector3(-diff / 2, 0, -diff),
+            new Vector3(-diff / 2, 0, 0),
+            new Vector3(diff / 2, 0, 0)
+          ];
+          planePos = new Vector3(-pos, -currentVal, 0);
+        }
+
+        const plane = new Plane(planePos, points, color, true, true);
         crossSections.add(plane);
       } else if (crossSectionType() === 'triangle') {
-        const plane = new Plane(
-          new Vector3(currentVal, pos, 0),
-          [
+        let points: Vector3[] = [];
+        let planePos = new Vector3(currentVal, pos, 0);
+
+        if (inTermsOf() === 'x') {
+          points = [
             new Vector3(0, -diff / 2, 0),
             new Vector3(0, diff / 2, 0),
             new Vector3(0, 0, -((diff * Math.sqrt(3)) / 2))
-          ],
-          color,
-          true,
-          true
-        );
+          ];
+        } else {
+          points = [
+            new Vector3(-diff / 2, 0, 0),
+            new Vector3(diff / 2, 0, 0),
+            new Vector3(0, 0, -((diff * Math.sqrt(3)) / 2))
+          ];
+          planePos = new Vector3(-pos, -currentVal, 0);
+        }
+
+        const plane = new Plane(planePos, points, color, true, true);
         crossSections.add(plane);
       } else if (crossSectionType() === 'semicircle') {
         const getSemiCirclePoints = (radius: number) => {
@@ -247,18 +294,31 @@ const App: Component = () => {
           for (let i = 0; i < sections + 1; i++) {
             const y = Math.sin(degToRad(rotation)) * radius;
             const z = Math.cos(degToRad(rotation)) * radius;
-            const point = new Vector3(0, y, z);
+            let point = new Vector3(0, y, z);
+            if (inTermsOf() === 'y') {
+              point = new Vector3(y, 0, z);
+            }
             res.push(point);
             rotation += 180 / sections;
           }
           return res;
         };
-        const points = [
-          new Vector3(0, -diff / 2, 0),
-          ...getSemiCirclePoints(diff / 2),
-          new Vector3(0, diff / 2, 0)
-        ];
-        const plane = new Plane(new Vector3(currentVal, pos, 0), points, color, true, true);
+
+        let planePos = new Vector3(currentVal, pos, 0);
+
+        if (inTermsOf() === 'y') {
+          planePos = new Vector3(-pos, -currentVal, 0);
+        }
+
+        const semiCirclePoints = getSemiCirclePoints(diff / 2);
+        let points: Vector3[] = [];
+        if (inTermsOf() === 'x') {
+          points = [new Vector3(0, -diff / 2, 0), ...semiCirclePoints, new Vector3(0, diff / 2, 0)];
+        } else {
+          points = [new Vector3(-diff / 2, 0, 0), ...semiCirclePoints, new Vector3(diff / 2, 0, 0)];
+        }
+
+        const plane = new Plane(planePos, points, color, true, true);
         crossSections.add(plane);
       }
 
@@ -266,11 +326,21 @@ const App: Component = () => {
     }
   };
 
-  const planeSortFunc = (planes: Plane[], cam: Camera) => {
+  const planeSortFuncX = (planes: Plane[], cam: Camera) => {
     return planes.sort((a, b) => {
       const aPos = new Vector3(a.pos.x, 0, 0);
       const aDist = distance3d(aPos, cam.pos);
       const bPos = new Vector3(b.pos.x, 0, 0);
+      const bDist = distance3d(bPos, cam.pos);
+      return bDist - aDist;
+    });
+  };
+
+  const planeSortFuncY = (planes: Plane[], cam: Camera) => {
+    return planes.sort((a, b) => {
+      const aPos = new Vector3(0, a.pos.y, 0);
+      const aDist = distance3d(aPos, cam.pos);
+      const bPos = new Vector3(0, b.pos.y, 0);
       const bDist = distance3d(bPos, cam.pos);
       return bDist - aDist;
     });
@@ -287,7 +357,7 @@ const App: Component = () => {
   onMount(() => {
     canvas = new Simulation(canvasRef, new Vector3(0, 0, -50));
     canvas.fitElement();
-    canvas.setSortFunc(planeSortFunc);
+    canvas.setSortFunc(planeSortFuncX);
 
     const axisSplit = 100;
     const axisIncX = graphWidth / axisSplit;
@@ -435,20 +505,34 @@ const App: Component = () => {
           </ul>
         </span>
         <h4>Functions</h4>
-        <input
-          placeholder="Function 1"
-          value={function1()}
-          onChange={changeFunction1}
-          onFocus={() => setFocusing(true)}
-          onBlur={() => setFocusing(false)}
-        />
-        <input
-          placeholder="Function 2"
-          value={function2()}
-          onChange={changeFunction2}
-          onFocus={() => setFocusing(true)}
-          onBlur={() => setFocusing(false)}
-        />
+        <div class="input-group">
+          <span>In terms of</span>
+          <select
+            onChange={changeInTermsOf}
+            value={inTermsOf()}
+          >
+            <option value="y">y</option>
+            <option value="x">x</option>
+          </select>
+        </div>
+        <div class="func-wrapper">
+          <input
+            placeholder="Function 1"
+            value={function1()}
+            onChange={changeFunction1}
+            onFocus={() => setFocusing(true)}
+            onBlur={() => setFocusing(false)}
+          />
+        </div>
+        <div class="func-wrapper">
+          <input
+            placeholder="Function 2"
+            value={function2()}
+            onChange={changeFunction2}
+            onFocus={() => setFocusing(true)}
+            onBlur={() => setFocusing(false)}
+          />
+        </div>
         <div class="input-group">
           <button onClick={graph}>Graph</button>
           <button onClick={clearGraph}>Clear graph</button>

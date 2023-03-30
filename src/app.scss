@@ -20,13 +20,18 @@
   }
 }
 
-input {
+input,
+select {
   padding: 8px;
   border-radius: 4px;
   outline: none;
   border: 1px solid rgb(125, 125, 125);
   font-size: 17px;
   min-width: 0;
+}
+
+select {
+  padding: 0 8px;
 }
 
 button {
@@ -64,6 +69,7 @@ code {
 }
 
 ul {
+  margin: 0;
   padding-left: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -72,4 +78,11 @@ ul {
 
 .select-btn {
   text-transform: capitalize;
+}
+
+.func-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
 }
