@@ -498,19 +498,21 @@ const App: Component = () => {
       <canvas ref={canvasRef} />
       <div class="controls">
         <span>By Jackson Otto</span>
-        <h4>Directions</h4>
-        <span>
-          <ul>
-            <li>
-              Press <code>W</code> <code>A</code> <code>S</code> <code>D</code> to move camera around
-            </li>
-            <li>
-              Press <code>Space</code> To move up, and <code>Shift</code> to move down
-            </li>
-            <li>Click and drag to look around</li>
-            <li>Some functions may not be implemented</li>
-          </ul>
-        </span>
+        <details>
+          <summary>Directions</summary>
+          <span>
+            <ul>
+              <li>
+                Press <code>W</code> <code>A</code> <code>S</code> <code>D</code> to move camera around
+              </li>
+              <li>
+                Press <code>Space</code> To move up, and <code>Shift</code> to move down
+              </li>
+              <li>Click and drag to look around</li>
+              <li>Some functions may not be implemented</li>
+            </ul>
+          </span>
+        </details>
         <h4>Functions</h4>
         <div class="input-group">
           <span>In terms of</span>

@@ -86,3 +86,14 @@ ul {
   gap: 4px;
   align-items: center;
 }
+
+summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+details {
+  border: 1px solid gray;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
