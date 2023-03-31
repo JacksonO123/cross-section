@@ -5,13 +5,15 @@ import {
   degToRad,
   distance3d,
   frameLoop,
+  LightSource,
   Line3d,
   Plane,
   radToDeg,
   SceneCollection,
   Simulation,
   Vector,
-  Vector3
+  Vector3,
+  sortPlanes
 } from 'simulationjs';
 import './app.scss';
 
@@ -33,6 +35,7 @@ Object.freeze(window.Math);
 
 const App: Component = () => {
   const [inTermsOf, setInTermsOf] = createSignal<FuncType>('x');
+  const [rotationAxisInTermsOf, setRotationLineInTermsOf] = createSignal<FuncType>('x');
   const [function1, setFunction1] = createSignal('x+6');
   const [function2, setFunction2] = createSignal('x^2');
   const [intervalStart, setIntervalStart] = createSignal(-2);
@@ -42,15 +45,25 @@ const App: Component = () => {
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
   const [crossSectionType, setCrossSectionType] = createSignal<CrossSectionTypes>('square');
+  const [rotationAxis, setRotationAxis] = createSignal(0);
   const crossSectionOptions: CrossSectionTypes[] = ['square', 'triangle', 'semicircle'];
 
   let canvasRef: HTMLCanvasElement;
   let canvas: Simulation;
   let graphs: SceneCollection;
   let crossSections: SceneCollection;
+  let rotationAxisScene: SceneCollection;
 
   const graphWidth = 120;
   const graphHeight = 120;
+
+  const updateSortFunc = () => {
+    if (inTermsOf() === 'x') {
+      canvas.setSortFunc(planeSortFuncX);
+    } else {
+      canvas.setSortFunc(planeSortFuncY);
+    }
+  };
 
   const changeInTermsOf = (e: InputChange<HTMLSelectElement>) => {
     const val = e.currentTarget.value as FuncType;
@@ -66,8 +79,33 @@ const App: Component = () => {
       setFunction2(function2().replace(/x/g, 'y'));
       canvas.setSortFunc(planeSortFuncY);
     }
+    updateSortFunc();
     graph();
     graphCrossSection();
+  };
+
+  const changeRotationAxisInTermsOf = (e: InputChange<HTMLSelectElement>) => {
+    setRotationLineInTermsOf(e.currentTarget.value as FuncType);
+  };
+
+  const updateRotationAxisGraph = () => {
+    rotationAxisScene.empty();
+    const sections = 100;
+    let currentVal = -graphWidth / 2;
+    while (currentVal < graphWidth / 2 - graphWidth / sections) {
+      const line = new Line3d(
+        new Vector3(currentVal, -rotationAxis(), 0),
+        new Vector3(currentVal + graphWidth / sections, -rotationAxis(), 0),
+        new Color(200, 0, 0)
+      );
+      rotationAxisScene.add(line);
+      currentVal += graphWidth / sections;
+    }
+  };
+
+  const changeRotationAxis = (e: InputChange) => {
+    setRotationAxis(+e.currentTarget.value);
+    updateRotationAxisGraph();
   };
 
   const changeFunction1 = (e: InputChange) => {
@@ -137,6 +175,7 @@ const App: Component = () => {
     for (let i = 0; i < chars.length; i++) {
       if (!validChars.includes(chars[i])) {
         console.error(`Invalid char: ${chars[i]}`);
+        console.trace();
         return false;
       }
     }
@@ -178,6 +217,7 @@ const App: Component = () => {
   };
 
   const graph = () => {
+    updateSortFunc();
     clearCrossSection();
     const func1Valid = isValidFunc(function1());
     const func2Valid = isValidFunc(function2());
@@ -216,6 +256,7 @@ const App: Component = () => {
   };
 
   const graphCrossSection = () => {
+    updateSortFunc();
     graph();
     clearCrossSection();
 
@@ -244,6 +285,8 @@ const App: Component = () => {
       eval(`func1Val = ${func1}`);
       eval(`func2Val = ${func2}`);
 
+      const color = new Color(79, 13, 153, 0.25);
+
       let diff = 0;
       let pos = 0;
       if (func2Val < func1Val) {
@@ -253,8 +296,6 @@ const App: Component = () => {
         diff = func2Val - func1Val;
         pos = diff / 2 - func2Val;
       }
-
-      const color = new Color(79, 13, 153, 0.25);
 
       if (crossSectionType() === 'square') {
         let points: Vector3[] = [];
@@ -340,6 +381,163 @@ const App: Component = () => {
     }
   };
 
+  const showRotation = () => {
+    clearCrossSection();
+
+    const func1Valid = isValidFunc(function1());
+    const func2Valid = isValidFunc(function2());
+
+    if (!func1Valid || !func2Valid) return;
+
+    const color = new Color(153, 78, 237);
+
+    const func1Mesh: Vector3[][] = [];
+    const func2Mesh: Vector3[][] = [];
+    let currentMeshRow = 0;
+    const inc = 0.3;
+    const meshRotationDetail = 30;
+    let currentVal = intervalStart();
+    const rAxis = -rotationAxis();
+    while (currentVal < intervalEnd()) {
+      func1Mesh.push([]);
+      func2Mesh.push([]);
+      let func1 = replaceVars(function1(), currentVal);
+      let func2 = replaceVars(function2(), currentVal);
+
+      let func1Val = Math.random();
+      let func2Val = Math.random();
+
+      eval(`func1Val = ${func1}`);
+      eval(`func2Val = ${func2}`);
+
+      let vec1 =
+        inTermsOf() === 'x' ? new Vector3(0, func1Val + rAxis, 0) : new Vector3(func1Val + rAxis, 0, 0);
+      let vec2 =
+        inTermsOf() === 'x' ? new Vector3(0, func2Val + rAxis, 0) : new Vector3(func2Val + rAxis, 0, 0);
+
+      let currentRotation = 0;
+      while (currentRotation <= 360) {
+        const rotationAmount =
+          inTermsOf() === 'x' ? new Vector3(currentRotation, 0, 0) : new Vector3(0, currentRotation, 0);
+        func1Mesh[currentMeshRow].push(vec1.clone().rotate(rotationAmount));
+        func2Mesh[currentMeshRow].push(vec2.clone().rotate(rotationAmount));
+        currentRotation += 360 / meshRotationDetail;
+      }
+
+      currentVal += inc;
+      currentMeshRow++;
+    }
+    const wireframe = true;
+    const xPosInc = (intervalStart() - intervalEnd()) / (currentMeshRow - 1);
+    for (let i = 0; i < currentMeshRow - 1; i++) {
+      for (let j = 0; j < func1Mesh[i].length - 1; j++) {
+        const points =
+          inTermsOf() === 'x'
+            ? [
+                new Vector3(0, func1Mesh[i][j].y, func1Mesh[i][j].z),
+                new Vector3(0, func1Mesh[i][j + 1].y, func1Mesh[i][j + 1].z),
+                new Vector3(-xPosInc, func1Mesh[i + 1][j + 1].y, func1Mesh[i + 1][j + 1].z),
+                new Vector3(-xPosInc, func1Mesh[i + 1][j].y, func1Mesh[i + 1][j].z)
+              ]
+            : [
+                new Vector3(-func1Mesh[i][j].x, 0, func1Mesh[i][j].z),
+                new Vector3(-func1Mesh[i][j + 1].x, 0, func1Mesh[i][j + 1].z),
+                new Vector3(-func1Mesh[i + 1][j + 1].x, xPosInc, func1Mesh[i + 1][j + 1].z),
+                new Vector3(-func1Mesh[i + 1][j].x, xPosInc, func1Mesh[i + 1][j].z)
+              ];
+        const pos =
+          inTermsOf() === 'x'
+            ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0)
+            : new Vector3(-rAxis, -intervalStart() + xPosInc * i, 0);
+        const plane = new Plane(pos, points, color, true, wireframe, true);
+        crossSections.add(plane);
+      }
+
+      for (let j = 0; j < func2Mesh[i].length - 1; j++) {
+        const points =
+          inTermsOf() === 'x'
+            ? [
+                new Vector3(0, func2Mesh[i][j].y, func2Mesh[i][j].z),
+                new Vector3(0, func2Mesh[i][j + 1].y, func2Mesh[i][j + 1].z),
+                new Vector3(-xPosInc, func2Mesh[i + 1][j + 1].y, func2Mesh[i + 1][j + 1].z),
+                new Vector3(-xPosInc, func2Mesh[i + 1][j].y, func2Mesh[i + 1][j].z)
+              ]
+            : [
+                new Vector3(-func2Mesh[i][j].x, 0, func2Mesh[i][j].z),
+                new Vector3(-func2Mesh[i][j + 1].x, 0, func2Mesh[i][j + 1].z),
+                new Vector3(-func2Mesh[i + 1][j + 1].x, xPosInc, func2Mesh[i + 1][j + 1].z),
+                new Vector3(-func2Mesh[i + 1][j].x, xPosInc, func2Mesh[i + 1][j].z)
+              ];
+        const pos =
+          inTermsOf() === 'x'
+            ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0)
+            : new Vector3(-rAxis, -intervalStart() + xPosInc * i, 0);
+        const plane = new Plane(pos, points, color, true, wireframe, true);
+        crossSections.add(plane);
+      }
+    }
+    for (let i = 0; i < func1Mesh[0].length - 1; i++) {
+      const plane1Points =
+        inTermsOf() === 'x'
+          ? [
+              new Vector3(0, func1Mesh[0][i].y, func1Mesh[0][i].z),
+              new Vector3(0, func1Mesh[0][i + 1].y, func1Mesh[0][i + 1].z),
+              new Vector3(0, func2Mesh[0][i + 1].y, func2Mesh[0][i + 1].z),
+              new Vector3(0, func2Mesh[0][i].y, func2Mesh[0][i].z)
+            ]
+          : [
+              new Vector3(-func1Mesh[0][i].x, 0, func1Mesh[0][i].z),
+              new Vector3(-func1Mesh[0][i + 1].x, 0, func1Mesh[0][i + 1].z),
+              new Vector3(-func2Mesh[0][i + 1].x, 0, func2Mesh[0][i + 1].z),
+              new Vector3(-func2Mesh[0][i].x, 0, func2Mesh[0][i].z)
+            ];
+      const plane2Points =
+        inTermsOf() === 'x'
+          ? [
+              new Vector3(0, func1Mesh[func1Mesh.length - 1][i].y, func1Mesh[func1Mesh.length - 1][i].z),
+              new Vector3(
+                0,
+                func1Mesh[func1Mesh.length - 1][i + 1].y,
+                func1Mesh[func1Mesh.length - 1][i + 1].z
+              ),
+              new Vector3(
+                0,
+                func2Mesh[func2Mesh.length - 1][i + 1].y,
+                func2Mesh[func2Mesh.length - 1][i + 1].z
+              ),
+              new Vector3(0, func2Mesh[func2Mesh.length - 1][i].y, func2Mesh[func2Mesh.length - 1][i].z)
+            ]
+          : [
+              new Vector3(-func1Mesh[func1Mesh.length - 1][i].x, 0, func1Mesh[func1Mesh.length - 1][i].z),
+              new Vector3(
+                -func1Mesh[func1Mesh.length - 1][i + 1].x,
+                0,
+                func1Mesh[func1Mesh.length - 1][i + 1].z
+              ),
+              new Vector3(
+                -func2Mesh[func2Mesh.length - 1][i + 1].x,
+                0,
+                func2Mesh[func2Mesh.length - 1][i + 1].z
+              ),
+              new Vector3(-func2Mesh[func2Mesh.length - 1][i].x, 0, func2Mesh[func2Mesh.length - 1][i].z)
+            ];
+      const plane1Pos =
+        inTermsOf() === 'x'
+          ? new Vector3(intervalStart(), rAxis, 0)
+          : new Vector3(-rAxis, -intervalStart(), 0);
+      const plane2Pos =
+        inTermsOf() === 'x' ? new Vector3(intervalEnd(), rAxis, 0) : new Vector3(-rAxis, -intervalEnd(), 0);
+      const plane1 = new Plane(plane1Pos, plane1Points, color, true, wireframe, true);
+      const plane2 = new Plane(plane2Pos, plane2Points, color, true, wireframe, true);
+      crossSections.add(plane1);
+      crossSections.add(plane2);
+    }
+
+    canvas.setLightSources([new LightSource(new Vector3(0, 50, -100), 1)]);
+    canvas.setAmbientLighting(0.35);
+    canvas.setSortFunc(sortPlanes);
+  };
+
   const planeSortFuncX = (planes: Plane[], cam: Camera) => {
     return planes.sort((a, b) => {
       const aPos = new Vector3(a.pos.x, 0, 0);
@@ -403,6 +601,9 @@ const App: Component = () => {
 
     graphs = new SceneCollection('graphs');
     canvas.add(graphs);
+
+    rotationAxisScene = new SceneCollection('rotation-axis');
+    canvas.add(rotationAxisScene);
 
     crossSections = new SceneCollection('cross-sections');
     canvas.add(crossSections);
@@ -553,7 +754,7 @@ const App: Component = () => {
           <button onClick={graph}>Graph</button>
           <button onClick={clearGraph}>Clear graph</button>
         </div>
-        <h4>Interval</h4>
+        <h4>Cross section and rotation interval</h4>
         <div class="input-group">
           <input
             placeholder="Start"
@@ -596,6 +797,28 @@ const App: Component = () => {
         {crossSectionType() === 'semicircle' && (
           <span>Warning: Calculating a large interval may affect performance</span>
         )}
+        <hr />
+        <h4>Rotations</h4>
+        <span>Warning: Rotation feature in beta</span>
+        <div class="input-group">
+          <span>Rotation axis in terms of:</span>
+          <select
+            onChange={changeRotationAxisInTermsOf}
+            value={rotationAxisInTermsOf()}
+          >
+            <option value="y">y</option>
+            <option value="x">x</option>
+          </select>
+        </div>
+        <input
+          type="number"
+          placeholder="Axis"
+          onInput={changeRotationAxis}
+          value={rotationAxis()}
+          onFocus={() => setFocusing(true)}
+          onBlur={() => setFocusing(false)}
+        />
+        <button onClick={showRotation}>Show rotation</button>
       </div>
     </div>
   );

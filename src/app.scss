@@ -17,6 +17,8 @@
     flex-direction: column;
     gap: 8px;
     width: 300px;
+    max-height: calc(100vh - 58px) !important;
+    overflow-y: scroll;
   }
 }
 
@@ -96,4 +98,11 @@ details {
   border: 1px solid gray;
   padding: 4px 8px;
   border-radius: 4px;
+}
+
+hr {
+  width: 100%;
+  background: black;
+  border: none;
+  height: 1px;
 }
