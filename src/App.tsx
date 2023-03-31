@@ -209,7 +209,14 @@ const App: Component = () => {
   };
 
   const graphCrossSection = () => {
-    crossSections.empty();
+    graph();
+    clearCrossSection();
+
+    const func1Valid = isValidFunc(function1());
+    const func2Valid = isValidFunc(function2());
+
+    if (!func1Valid || !func2Valid) return;
+
     let currentVal = intervalStart();
     while (currentVal < intervalEnd() && inc() > 0) {
       let func1 = replaceVars(function1(), currentVal);
