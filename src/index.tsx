@@ -12,6 +12,4 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-Object.freeze(Math);
-
 render(() => <App />, root!);

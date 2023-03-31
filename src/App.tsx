@@ -24,6 +24,13 @@ type CrossSectionTypes = 'square' | 'triangle' | 'semicircle';
 
 type FuncType = 'x' | 'y';
 
+Object.defineProperty(window, 'Math', {
+  value: Math,
+  writable: false,
+  configurable: false
+});
+Object.freeze(window.Math);
+
 const App: Component = () => {
   const [inTermsOf, setInTermsOf] = createSignal<FuncType>('x');
   const [function1, setFunction1] = createSignal('x+6');
