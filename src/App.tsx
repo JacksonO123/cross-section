@@ -36,16 +36,16 @@ Object.freeze(window.Math);
 const App: Component = () => {
   const [inTermsOf, setInTermsOf] = createSignal<FuncType>('x');
   const [rotationAxisType, setRotationAxisType] = createSignal<FuncType>('y');
-  const [function1, setFunction1] = createSignal('2-(x^2)');
+  const [function1, setFunction1] = createSignal('x+6');
   const [function2, setFunction2] = createSignal('x^2');
-  const [intervalStart, setIntervalStart] = createSignal(-1);
-  const [intervalEnd, setIntervalEnd] = createSignal(1);
-  const [inc, setInc] = createSignal(0.05);
+  const [intervalStart, setIntervalStart] = createSignal(-2);
+  const [intervalEnd, setIntervalEnd] = createSignal(3);
+  const [inc, setInc] = createSignal(0.07);
   const [focusing, setFocusing] = createSignal(false);
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
   const [crossSectionType, setCrossSectionType] = createSignal<CrossSectionTypes>('square');
-  const [rotationAxis, setRotationAxis] = createSignal(-1);
+  const [rotationAxis, setRotationAxis] = createSignal(0);
   const crossSectionOptions: CrossSectionTypes[] = ['square', 'triangle', 'semicircle'];
 
   let canvasRef: HTMLCanvasElement;
