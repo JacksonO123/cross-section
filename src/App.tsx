@@ -35,7 +35,7 @@ Object.freeze(window.Math);
 
 const App: Component = () => {
   const [inTermsOf, setInTermsOf] = createSignal<FuncType>('x');
-  const [rotationAxisType, setRotationAxisType] = createSignal<FuncType>('x');
+  const [rotationAxisType, setRotationAxisType] = createSignal<FuncType>('y');
   const [function1, setFunction1] = createSignal('x+6');
   const [function2, setFunction2] = createSignal('x^2');
   const [intervalStart, setIntervalStart] = createSignal(-2);
@@ -45,7 +45,7 @@ const App: Component = () => {
   const [func1Points, setFunc1Points] = createSignal<Vector[]>([]);
   const [func2Points, setFunc2Points] = createSignal<Vector[]>([]);
   const [crossSectionType, setCrossSectionType] = createSignal<CrossSectionTypes>('square');
-  const [rotationAxis, setRotationAxis] = createSignal(-3);
+  const [rotationAxis, setRotationAxis] = createSignal(0);
   const crossSectionOptions: CrossSectionTypes[] = ['square', 'triangle', 'semicircle'];
 
   let canvasRef: HTMLCanvasElement;
@@ -91,15 +91,28 @@ const App: Component = () => {
   const updateRotationAxisGraph = () => {
     rotationAxisScene.empty();
     const sections = 100;
-    let currentVal = -graphWidth / 2;
-    while (currentVal < graphWidth / 2 - graphWidth / sections) {
-      const line = new Line3d(
-        new Vector3(currentVal, -rotationAxis(), 0),
-        new Vector3(currentVal + graphWidth / sections, -rotationAxis(), 0),
-        new Color(200, 0, 0)
-      );
-      rotationAxisScene.add(line);
-      currentVal += graphWidth / sections;
+    if (rotationAxisType() === 'y') {
+      let currentVal = -graphWidth / 2;
+      while (currentVal < graphWidth / 2 - graphWidth / sections) {
+        const line = new Line3d(
+          new Vector3(currentVal, -rotationAxis(), 0),
+          new Vector3(currentVal + graphWidth / sections, -rotationAxis(), 0),
+          new Color(200, 0, 0)
+        );
+        rotationAxisScene.add(line);
+        currentVal += graphWidth / sections;
+      }
+    } else {
+      let currentVal = -graphHeight / 2;
+      while (currentVal < graphHeight / 2 - graphHeight / sections) {
+        const line = new Line3d(
+          new Vector3(currentVal, -rotationAxis(), 0),
+          new Vector3(currentVal + graphHeight / sections, -rotationAxis(), 0),
+          new Color(200, 0, 0)
+        );
+        rotationAxisScene.add(line);
+        currentVal += graphHeight / sections;
+      }
     }
   };
 
@@ -403,19 +416,40 @@ const App: Component = () => {
       for (let j = 0; j < func1Mesh[i].length - 1; j++) {
         const points =
           rotationAxisType() === 'y'
+            ? inTermsOf() === 'x'
+              ? [
+                  new Vector3(0, func1Mesh[i][j].y, func1Mesh[i][j].z),
+                  new Vector3(0, func1Mesh[i][j + 1].y, func1Mesh[i][j + 1].z),
+                  new Vector3(-xPosInc, func1Mesh[i + 1][j + 1].y, func1Mesh[i + 1][j + 1].z),
+                  new Vector3(-xPosInc, func1Mesh[i + 1][j].y, func1Mesh[i + 1][j].z)
+                ]
+              : [
+                  new Vector3(func1Mesh[i][j].y, 0, func1Mesh[i][j].z),
+                  new Vector3(func1Mesh[i][j + 1].y, 0, func1Mesh[i][j + 1].z),
+                  new Vector3(func1Mesh[i + 1][j + 1].y, xPosInc, func1Mesh[i + 1][j + 1].z),
+                  new Vector3(func1Mesh[i + 1][j].y, xPosInc, func1Mesh[i + 1][j].z)
+                ]
+            : inTermsOf() === 'x'
             ? [
-                new Vector3(0, func1Mesh[i][j].y, func1Mesh[i][j].z),
-                new Vector3(0, func1Mesh[i][j + 1].y, func1Mesh[i][j + 1].z),
-                new Vector3(-xPosInc, func1Mesh[i + 1][j + 1].y, func1Mesh[i + 1][j + 1].z),
-                new Vector3(-xPosInc, func1Mesh[i + 1][j].y, func1Mesh[i + 1][j].z)
-              ]
-            : [
                 new Vector3(func1Mesh[i][j].x, 0, func1Mesh[i][j].z),
                 new Vector3(func1Mesh[i][j + 1].x, 0, func1Mesh[i][j + 1].z),
                 new Vector3(func1Mesh[i + 1][j + 1].x, func1Mesh[i][0].y - func1Mesh[i + 1][0].y, func1Mesh[i + 1][j + 1].z),
                 new Vector3(func1Mesh[i + 1][j].x, func1Mesh[i][0].y - func1Mesh[i + 1][0].y, func1Mesh[i + 1][j].z)
+              ]
+            : [
+                new Vector3(0, -func1Mesh[i][j].x, func1Mesh[i][j].z),
+                new Vector3(0, -func1Mesh[i][j + 1].x, func1Mesh[i][j + 1].z),
+                new Vector3(-func1Mesh[i][0].y + func1Mesh[i + 1][0].y, -func1Mesh[i + 1][j + 1].x, func1Mesh[i + 1][j + 1].z),
+                new Vector3(-func1Mesh[i][0].y + func1Mesh[i + 1][0].y, -func1Mesh[i + 1][j].x, func1Mesh[i + 1][j].z)
               ];
-        const pos = rotationAxisType() === 'y' ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0) : new Vector3(-rAxis, -func1Mesh[i][0].y, 0);
+        const pos =
+          rotationAxisType() === 'y'
+            ? inTermsOf() === 'x'
+              ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0)
+              : new Vector3(rAxis, -intervalStart() + xPosInc * i, 0)
+            : inTermsOf() === 'x'
+            ? new Vector3(-rAxis, -func1Mesh[i][0].y, 0)
+            : new Vector3(func1Mesh[i][0].y, -rAxis, 0);
         const plane = new Plane(pos, points, color, true, wireframe, true);
         crossSections.add(plane);
       }
@@ -423,19 +457,40 @@ const App: Component = () => {
       for (let j = 0; j < func2Mesh[i].length - 1; j++) {
         const points =
           rotationAxisType() === 'y'
+            ? inTermsOf() === 'x'
+              ? [
+                  new Vector3(0, func2Mesh[i][j].y, func2Mesh[i][j].z),
+                  new Vector3(0, func2Mesh[i][j + 1].y, func2Mesh[i][j + 1].z),
+                  new Vector3(-xPosInc, func2Mesh[i + 1][j + 1].y, func2Mesh[i + 1][j + 1].z),
+                  new Vector3(-xPosInc, func2Mesh[i + 1][j].y, func2Mesh[i + 1][j].z)
+                ]
+              : [
+                  new Vector3(func2Mesh[i][j].y, 0, func2Mesh[i][j].z),
+                  new Vector3(func2Mesh[i][j + 1].y, 0, func2Mesh[i][j + 1].z),
+                  new Vector3(func2Mesh[i + 1][j + 1].y, xPosInc, func2Mesh[i + 1][j + 1].z),
+                  new Vector3(func2Mesh[i + 1][j].y, xPosInc, func2Mesh[i + 1][j].z)
+                ]
+            : inTermsOf() === 'x'
             ? [
-                new Vector3(0, func2Mesh[i][j].y, func2Mesh[i][j].z),
-                new Vector3(0, func2Mesh[i][j + 1].y, func2Mesh[i][j + 1].z),
-                new Vector3(-xPosInc, func2Mesh[i + 1][j + 1].y, func2Mesh[i + 1][j + 1].z),
-                new Vector3(-xPosInc, func2Mesh[i + 1][j].y, func2Mesh[i + 1][j].z)
-              ]
-            : [
                 new Vector3(func2Mesh[i][j].x, 0, func2Mesh[i][j].z),
                 new Vector3(func2Mesh[i][j + 1].x, 0, func2Mesh[i][j + 1].z),
                 new Vector3(func2Mesh[i + 1][j + 1].x, func2Mesh[i][0].y - func2Mesh[i + 1][0].y, func2Mesh[i + 1][j + 1].z),
                 new Vector3(func2Mesh[i + 1][j].x, func2Mesh[i][0].y - func2Mesh[i + 1][0].y, func2Mesh[i + 1][j].z)
+              ]
+            : [
+                new Vector3(0, -func2Mesh[i][j].x, func2Mesh[i][j].z),
+                new Vector3(0, -func2Mesh[i][j + 1].x, func2Mesh[i][j + 1].z),
+                new Vector3(-func2Mesh[i][0].y + func2Mesh[i + 1][0].y, -func2Mesh[i + 1][j + 1].x, func2Mesh[i + 1][j + 1].z),
+                new Vector3(-func2Mesh[i][0].y + func2Mesh[i + 1][0].y, -func2Mesh[i + 1][j].x, func2Mesh[i + 1][j].z)
               ];
-        const pos = rotationAxisType() === 'y' ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0) : new Vector3(-rAxis, -func2Mesh[i][0].y, 0);
+        const pos =
+          rotationAxisType() === 'y'
+            ? inTermsOf() === 'x'
+              ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0)
+              : new Vector3(rAxis, -intervalStart() + xPosInc * i, 0)
+            : inTermsOf() === 'x'
+            ? new Vector3(-rAxis, -func2Mesh[i][0].y, 0)
+            : new Vector3(func2Mesh[i][0].y, -rAxis, 0);
         const plane = new Plane(pos, points, color, true, wireframe, true);
         crossSections.add(plane);
       }
@@ -443,27 +498,49 @@ const App: Component = () => {
     for (let i = 0; i < func1Mesh[0].length - 1; i++) {
       const plane1Points =
         rotationAxisType() === 'y'
+          ? inTermsOf() === 'x'
+            ? [
+                new Vector3(0, func1Mesh[0][i].y, func1Mesh[0][i].z),
+                new Vector3(0, func1Mesh[0][i + 1].y, func1Mesh[0][i + 1].z),
+                new Vector3(0, func2Mesh[0][i + 1].y, func2Mesh[0][i + 1].z),
+                new Vector3(0, func2Mesh[0][i].y, func2Mesh[0][i].z)
+              ]
+            : [
+                new Vector3(func1Mesh[0][i].y, 0, func1Mesh[0][i].z),
+                new Vector3(func1Mesh[0][i + 1].y, 0, func1Mesh[0][i + 1].z),
+                new Vector3(func2Mesh[0][i + 1].y, 0, func2Mesh[0][i + 1].z),
+                new Vector3(func2Mesh[0][i].y, 0, func2Mesh[0][i].z)
+              ]
+          : inTermsOf() === 'x'
           ? [
-              new Vector3(0, func1Mesh[0][i].y, func1Mesh[0][i].z),
-              new Vector3(0, func1Mesh[0][i + 1].y, func1Mesh[0][i + 1].z),
-              new Vector3(0, func2Mesh[0][i + 1].y, func2Mesh[0][i + 1].z),
-              new Vector3(0, func2Mesh[0][i].y, func2Mesh[0][i].z)
-            ]
-          : [
               new Vector3(-func1Mesh[0][i].x, func1Mesh[0][i + 1].y - func2Mesh[0][i].y, func1Mesh[0][i].z),
               new Vector3(-func1Mesh[0][i + 1].x, func1Mesh[0][i + 1].y - func2Mesh[0][i].y, func1Mesh[0][i + 1].z),
               new Vector3(-func2Mesh[0][i + 1].x, 0, func2Mesh[0][i + 1].z),
               new Vector3(-func2Mesh[0][i].x, 0, func2Mesh[0][i].z)
+            ]
+          : [
+              new Vector3(func1Mesh[0][i + 1].y - func2Mesh[0][i].y, -func1Mesh[0][i].x, func1Mesh[0][i].z),
+              new Vector3(func1Mesh[0][i + 1].y - func2Mesh[0][i].y, -func1Mesh[0][i + 1].x, func1Mesh[0][i + 1].z),
+              new Vector3(0, -func2Mesh[0][i + 1].x, func2Mesh[0][i + 1].z),
+              new Vector3(0, -func2Mesh[0][i].x, func2Mesh[0][i].z)
             ];
       const plane2Points =
         rotationAxisType() === 'y'
+          ? inTermsOf() === 'x'
+            ? [
+                new Vector3(0, func1Mesh[func1Mesh.length - 1][i].y, func1Mesh[func1Mesh.length - 1][i].z),
+                new Vector3(0, func1Mesh[func1Mesh.length - 1][i + 1].y, func1Mesh[func1Mesh.length - 1][i + 1].z),
+                new Vector3(0, func2Mesh[func2Mesh.length - 1][i + 1].y, func2Mesh[func2Mesh.length - 1][i + 1].z),
+                new Vector3(0, func2Mesh[func2Mesh.length - 1][i].y, func2Mesh[func2Mesh.length - 1][i].z)
+              ]
+            : [
+                new Vector3(func1Mesh[func1Mesh.length - 1][i].y, 0, func1Mesh[func1Mesh.length - 1][i].z),
+                new Vector3(func1Mesh[func1Mesh.length - 1][i + 1].y, 0, func1Mesh[func1Mesh.length - 1][i + 1].z),
+                new Vector3(func2Mesh[func2Mesh.length - 1][i + 1].y, 0, func2Mesh[func2Mesh.length - 1][i + 1].z),
+                new Vector3(func2Mesh[func2Mesh.length - 1][i].y, 0, func2Mesh[func2Mesh.length - 1][i].z)
+              ]
+          : inTermsOf() === 'x'
           ? [
-              new Vector3(0, func1Mesh[func1Mesh.length - 1][i].y, func1Mesh[func1Mesh.length - 1][i].z),
-              new Vector3(0, func1Mesh[func1Mesh.length - 1][i + 1].y, func1Mesh[func1Mesh.length - 1][i + 1].z),
-              new Vector3(0, func2Mesh[func2Mesh.length - 1][i + 1].y, func2Mesh[func2Mesh.length - 1][i + 1].z),
-              new Vector3(0, func2Mesh[func2Mesh.length - 1][i].y, func2Mesh[func2Mesh.length - 1][i].z)
-            ]
-          : [
               new Vector3(
                 func1Mesh[func1Mesh.length - 1][i].x,
                 func2Mesh[func2Mesh.length - 1][i].y - func1Mesh[func1Mesh.length - 1][i + 1].y,
@@ -476,10 +553,37 @@ const App: Component = () => {
               ),
               new Vector3(func2Mesh[func2Mesh.length - 1][i + 1].x, 0, func2Mesh[func2Mesh.length - 1][i + 1].z),
               new Vector3(func2Mesh[func2Mesh.length - 1][i].x, 0, func2Mesh[func2Mesh.length - 1][i].z)
+            ]
+          : [
+              new Vector3(
+                func1Mesh[func1Mesh.length - 1][i + 1].y - func2Mesh[func2Mesh.length - 1][i].y,
+                func1Mesh[func1Mesh.length - 1][i].x,
+                func1Mesh[func1Mesh.length - 1][i].z
+              ),
+              new Vector3(
+                func1Mesh[func1Mesh.length - 1][i + 1].y - func2Mesh[func2Mesh.length - 1][i].y,
+                func1Mesh[func1Mesh.length - 1][i + 1].x,
+                func1Mesh[func1Mesh.length - 1][i + 1].z
+              ),
+              new Vector3(0, func2Mesh[func2Mesh.length - 1][i + 1].x, func2Mesh[func2Mesh.length - 1][i + 1].z),
+              new Vector3(0, func2Mesh[func2Mesh.length - 1][i].x, func2Mesh[func2Mesh.length - 1][i].z)
             ];
-      const plane1Pos = rotationAxisType() === 'y' ? new Vector3(intervalStart(), rAxis, 0) : new Vector3(-rAxis, -func1Mesh[0][0].y, 0);
+      const plane1Pos =
+        rotationAxisType() === 'y'
+          ? inTermsOf() === 'x'
+            ? new Vector3(intervalStart(), rAxis, 0)
+            : new Vector3(rAxis, -intervalStart(), 0)
+          : inTermsOf() === 'x'
+          ? new Vector3(-rAxis, -func1Mesh[0][0].y, 0)
+          : new Vector3(func1Mesh[0][0].y, -rAxis, 0);
       const plane2Pos =
-        rotationAxisType() === 'y' ? new Vector3(intervalEnd(), rAxis, 0) : new Vector3(-rAxis, -func2Mesh[func2Mesh.length - 1][0].y, 0);
+        rotationAxisType() === 'y'
+          ? inTermsOf() === 'x'
+            ? new Vector3(intervalEnd(), rAxis, 0)
+            : new Vector3(rAxis, -intervalEnd(), 0)
+          : inTermsOf() === 'x'
+          ? new Vector3(-rAxis, -func2Mesh[func2Mesh.length - 1][0].y, 0)
+          : new Vector3(func2Mesh[func2Mesh.length - 1][0].y, -rAxis, 0);
       const plane1 = new Plane(plane1Pos, plane1Points, color, true, wireframe, true);
       const plane2 = new Plane(plane2Pos, plane2Points, color, true, wireframe, true);
       crossSections.add(plane1);
