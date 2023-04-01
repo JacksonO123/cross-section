@@ -86,6 +86,7 @@ const App: Component = () => {
 
   const changeRotationAxisType = (e: InputChange<HTMLSelectElement>) => {
     setRotationAxisType(e.currentTarget.value as FuncType);
+    updateRotationAxisGraph();
   };
 
   const updateRotationAxisGraph = () => {
@@ -106,8 +107,8 @@ const App: Component = () => {
       let currentVal = -graphHeight / 2;
       while (currentVal < graphHeight / 2 - graphHeight / sections) {
         const line = new Line3d(
-          new Vector3(currentVal, -rotationAxis(), 0),
-          new Vector3(currentVal + graphHeight / sections, -rotationAxis(), 0),
+          new Vector3(rotationAxis(), currentVal, 0),
+          new Vector3(rotationAxis(), currentVal + graphHeight / sections, 0),
           new Color(200, 0, 0)
         );
         rotationAxisScene.add(line);
