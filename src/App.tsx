@@ -859,7 +859,6 @@ const App: Component = () => {
         {crossSectionType() === 'semicircle' && <span>Warning: Calculating a large interval may affect performance</span>}
         <hr />
         <h4>Rotations</h4>
-        <span>Warning: Rotation feature in beta</span>
         <div
           class="input-group"
           style={{ 'align-items': 'center' }}
