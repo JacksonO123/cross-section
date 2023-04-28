@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "start": "vite --port 3000",
-    "dev": "vite",
+    "dev": "vite --port 3000",
     "build": "vite build",
     "serve": "vite preview"
   },

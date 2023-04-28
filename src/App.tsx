@@ -154,6 +154,7 @@ const App: Component = () => {
       .replace(/arcsin/g, '')
       .replace(/arccos/g, '')
       .replace(/arctan/g, '')
+      .replace(/sign/g, '')
       .replace(/sin/g, '')
       .replace(/cos/g, '')
       .replace(/tan/g, '')
@@ -161,7 +162,8 @@ const App: Component = () => {
       .replace(/log/g, '')
       .replace(/pi/g, '')
       .replace(/floor/g, '')
-      .replace(/ceil/g, '');
+      .replace(/ceil/g, '')
+      .replace(/abs/g, '');
     let validChars = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'e', '(', ')', '.', '^', '/', '-', '*', '+', ' '];
 
     validChars.push(inTermsOf());
@@ -192,7 +194,9 @@ const App: Component = () => {
       .replace(/arctan/g, 'Math.atan')
       .replace(/sqrt/g, 'Math.sqrt')
       .replace(/log/g, 'Math.log')
-      .replace(/floor/g, 'Math.floor');
+      .replace(/floor/g, 'Math.floor')
+      .replace(/sign/g, 'Math.sign')
+      .replace(/abs/g, 'Math.abs');
   };
 
   const toVec3 = (vec: Vector, z: number) => {
