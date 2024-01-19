@@ -47,6 +47,8 @@ const App: Component = () => {
   const [crossSectionType, setCrossSectionType] = createSignal<CrossSectionTypes>('square');
   const [rotationAxis, setRotationAxis] = createSignal(0);
   const crossSectionOptions: CrossSectionTypes[] = ['square', 'triangle', 'semicircle'];
+  const controlBtns = ['Meta', 'Control', 'Alt'];
+  let controlsHeld = 0;
 
   let canvasRef: HTMLCanvasElement;
   let canvas: Simulation;
@@ -439,26 +441,26 @@ const App: Component = () => {
                   new Vector3(func1Mesh[i + 1][j].y, xPosInc, func1Mesh[i + 1][j].z)
                 ]
             : inTermsOf() === 'x'
-            ? [
-                new Vector3(func1Mesh[i][j].x, 0, func1Mesh[i][j].z),
-                new Vector3(func1Mesh[i][j + 1].x, 0, func1Mesh[i][j + 1].z),
-                new Vector3(func1Mesh[i + 1][j + 1].x, func1Mesh[i][0].y - func1Mesh[i + 1][0].y, func1Mesh[i + 1][j + 1].z),
-                new Vector3(func1Mesh[i + 1][j].x, func1Mesh[i][0].y - func1Mesh[i + 1][0].y, func1Mesh[i + 1][j].z)
-              ]
-            : [
-                new Vector3(0, -func1Mesh[i][j].x, func1Mesh[i][j].z),
-                new Vector3(0, -func1Mesh[i][j + 1].x, func1Mesh[i][j + 1].z),
-                new Vector3(-func1Mesh[i][0].y + func1Mesh[i + 1][0].y, -func1Mesh[i + 1][j + 1].x, func1Mesh[i + 1][j + 1].z),
-                new Vector3(-func1Mesh[i][0].y + func1Mesh[i + 1][0].y, -func1Mesh[i + 1][j].x, func1Mesh[i + 1][j].z)
-              ];
+              ? [
+                  new Vector3(func1Mesh[i][j].x, 0, func1Mesh[i][j].z),
+                  new Vector3(func1Mesh[i][j + 1].x, 0, func1Mesh[i][j + 1].z),
+                  new Vector3(func1Mesh[i + 1][j + 1].x, func1Mesh[i][0].y - func1Mesh[i + 1][0].y, func1Mesh[i + 1][j + 1].z),
+                  new Vector3(func1Mesh[i + 1][j].x, func1Mesh[i][0].y - func1Mesh[i + 1][0].y, func1Mesh[i + 1][j].z)
+                ]
+              : [
+                  new Vector3(0, -func1Mesh[i][j].x, func1Mesh[i][j].z),
+                  new Vector3(0, -func1Mesh[i][j + 1].x, func1Mesh[i][j + 1].z),
+                  new Vector3(-func1Mesh[i][0].y + func1Mesh[i + 1][0].y, -func1Mesh[i + 1][j + 1].x, func1Mesh[i + 1][j + 1].z),
+                  new Vector3(-func1Mesh[i][0].y + func1Mesh[i + 1][0].y, -func1Mesh[i + 1][j].x, func1Mesh[i + 1][j].z)
+                ];
         const pos =
           rotationAxisType() === 'y'
             ? inTermsOf() === 'x'
               ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0)
               : new Vector3(rAxis, -intervalStart() + xPosInc * i, 0)
             : inTermsOf() === 'x'
-            ? new Vector3(-rAxis, -func1Mesh[i][0].y, 0)
-            : new Vector3(func1Mesh[i][0].y, -rAxis, 0);
+              ? new Vector3(-rAxis, -func1Mesh[i][0].y, 0)
+              : new Vector3(func1Mesh[i][0].y, -rAxis, 0);
         const plane = new Plane(pos, points, color, true, wireframe, true);
         crossSections.add(plane);
       }
@@ -480,26 +482,26 @@ const App: Component = () => {
                   new Vector3(func2Mesh[i + 1][j].y, xPosInc, func2Mesh[i + 1][j].z)
                 ]
             : inTermsOf() === 'x'
-            ? [
-                new Vector3(func2Mesh[i][j].x, 0, func2Mesh[i][j].z),
-                new Vector3(func2Mesh[i][j + 1].x, 0, func2Mesh[i][j + 1].z),
-                new Vector3(func2Mesh[i + 1][j + 1].x, func2Mesh[i][0].y - func2Mesh[i + 1][0].y, func2Mesh[i + 1][j + 1].z),
-                new Vector3(func2Mesh[i + 1][j].x, func2Mesh[i][0].y - func2Mesh[i + 1][0].y, func2Mesh[i + 1][j].z)
-              ]
-            : [
-                new Vector3(0, -func2Mesh[i][j].x, func2Mesh[i][j].z),
-                new Vector3(0, -func2Mesh[i][j + 1].x, func2Mesh[i][j + 1].z),
-                new Vector3(-func2Mesh[i][0].y + func2Mesh[i + 1][0].y, -func2Mesh[i + 1][j + 1].x, func2Mesh[i + 1][j + 1].z),
-                new Vector3(-func2Mesh[i][0].y + func2Mesh[i + 1][0].y, -func2Mesh[i + 1][j].x, func2Mesh[i + 1][j].z)
-              ];
+              ? [
+                  new Vector3(func2Mesh[i][j].x, 0, func2Mesh[i][j].z),
+                  new Vector3(func2Mesh[i][j + 1].x, 0, func2Mesh[i][j + 1].z),
+                  new Vector3(func2Mesh[i + 1][j + 1].x, func2Mesh[i][0].y - func2Mesh[i + 1][0].y, func2Mesh[i + 1][j + 1].z),
+                  new Vector3(func2Mesh[i + 1][j].x, func2Mesh[i][0].y - func2Mesh[i + 1][0].y, func2Mesh[i + 1][j].z)
+                ]
+              : [
+                  new Vector3(0, -func2Mesh[i][j].x, func2Mesh[i][j].z),
+                  new Vector3(0, -func2Mesh[i][j + 1].x, func2Mesh[i][j + 1].z),
+                  new Vector3(-func2Mesh[i][0].y + func2Mesh[i + 1][0].y, -func2Mesh[i + 1][j + 1].x, func2Mesh[i + 1][j + 1].z),
+                  new Vector3(-func2Mesh[i][0].y + func2Mesh[i + 1][0].y, -func2Mesh[i + 1][j].x, func2Mesh[i + 1][j].z)
+                ];
         const pos =
           rotationAxisType() === 'y'
             ? inTermsOf() === 'x'
               ? new Vector3(intervalStart() - xPosInc * i, rAxis, 0)
               : new Vector3(rAxis, -intervalStart() + xPosInc * i, 0)
             : inTermsOf() === 'x'
-            ? new Vector3(-rAxis, -func2Mesh[i][0].y, 0)
-            : new Vector3(func2Mesh[i][0].y, -rAxis, 0);
+              ? new Vector3(-rAxis, -func2Mesh[i][0].y, 0)
+              : new Vector3(func2Mesh[i][0].y, -rAxis, 0);
         const plane = new Plane(pos, points, color, true, wireframe, true);
         crossSections.add(plane);
       }
@@ -521,18 +523,18 @@ const App: Component = () => {
                 new Vector3(func2Mesh[0][i].y, 0, func2Mesh[0][i].z)
               ]
           : inTermsOf() === 'x'
-          ? [
-              new Vector3(-func1Mesh[0][i].x, func1Mesh[0][i + 1].y - func2Mesh[0][i].y, func1Mesh[0][i].z),
-              new Vector3(-func1Mesh[0][i + 1].x, func1Mesh[0][i + 1].y - func2Mesh[0][i].y, func1Mesh[0][i + 1].z),
-              new Vector3(-func2Mesh[0][i + 1].x, 0, func2Mesh[0][i + 1].z),
-              new Vector3(-func2Mesh[0][i].x, 0, func2Mesh[0][i].z)
-            ]
-          : [
-              new Vector3(func1Mesh[0][i + 1].y - func2Mesh[0][i].y, -func1Mesh[0][i].x, func1Mesh[0][i].z),
-              new Vector3(func1Mesh[0][i + 1].y - func2Mesh[0][i].y, -func1Mesh[0][i + 1].x, func1Mesh[0][i + 1].z),
-              new Vector3(0, -func2Mesh[0][i + 1].x, func2Mesh[0][i + 1].z),
-              new Vector3(0, -func2Mesh[0][i].x, func2Mesh[0][i].z)
-            ];
+            ? [
+                new Vector3(-func1Mesh[0][i].x, func1Mesh[0][i + 1].y - func2Mesh[0][i].y, func1Mesh[0][i].z),
+                new Vector3(-func1Mesh[0][i + 1].x, func1Mesh[0][i + 1].y - func2Mesh[0][i].y, func1Mesh[0][i + 1].z),
+                new Vector3(-func2Mesh[0][i + 1].x, 0, func2Mesh[0][i + 1].z),
+                new Vector3(-func2Mesh[0][i].x, 0, func2Mesh[0][i].z)
+              ]
+            : [
+                new Vector3(func1Mesh[0][i + 1].y - func2Mesh[0][i].y, -func1Mesh[0][i].x, func1Mesh[0][i].z),
+                new Vector3(func1Mesh[0][i + 1].y - func2Mesh[0][i].y, -func1Mesh[0][i + 1].x, func1Mesh[0][i + 1].z),
+                new Vector3(0, -func2Mesh[0][i + 1].x, func2Mesh[0][i + 1].z),
+                new Vector3(0, -func2Mesh[0][i].x, func2Mesh[0][i].z)
+              ];
       const plane2Points =
         rotationAxisType() === 'y'
           ? inTermsOf() === 'x'
@@ -549,50 +551,50 @@ const App: Component = () => {
                 new Vector3(func2Mesh[func2Mesh.length - 1][i].y, 0, func2Mesh[func2Mesh.length - 1][i].z)
               ]
           : inTermsOf() === 'x'
-          ? [
-              new Vector3(
-                func1Mesh[func1Mesh.length - 1][i].x,
-                func2Mesh[func2Mesh.length - 1][i].y - func1Mesh[func1Mesh.length - 1][i + 1].y,
-                func1Mesh[func1Mesh.length - 1][i].z
-              ),
-              new Vector3(
-                func1Mesh[func1Mesh.length - 1][i + 1].x,
-                func2Mesh[func2Mesh.length - 1][i].y - func1Mesh[func1Mesh.length - 1][i + 1].y,
-                func1Mesh[func1Mesh.length - 1][i + 1].z
-              ),
-              new Vector3(func2Mesh[func2Mesh.length - 1][i + 1].x, 0, func2Mesh[func2Mesh.length - 1][i + 1].z),
-              new Vector3(func2Mesh[func2Mesh.length - 1][i].x, 0, func2Mesh[func2Mesh.length - 1][i].z)
-            ]
-          : [
-              new Vector3(
-                func1Mesh[func1Mesh.length - 1][i + 1].y - func2Mesh[func2Mesh.length - 1][i].y,
-                func1Mesh[func1Mesh.length - 1][i].x,
-                func1Mesh[func1Mesh.length - 1][i].z
-              ),
-              new Vector3(
-                func1Mesh[func1Mesh.length - 1][i + 1].y - func2Mesh[func2Mesh.length - 1][i].y,
-                func1Mesh[func1Mesh.length - 1][i + 1].x,
-                func1Mesh[func1Mesh.length - 1][i + 1].z
-              ),
-              new Vector3(0, func2Mesh[func2Mesh.length - 1][i + 1].x, func2Mesh[func2Mesh.length - 1][i + 1].z),
-              new Vector3(0, func2Mesh[func2Mesh.length - 1][i].x, func2Mesh[func2Mesh.length - 1][i].z)
-            ];
+            ? [
+                new Vector3(
+                  func1Mesh[func1Mesh.length - 1][i].x,
+                  func2Mesh[func2Mesh.length - 1][i].y - func1Mesh[func1Mesh.length - 1][i + 1].y,
+                  func1Mesh[func1Mesh.length - 1][i].z
+                ),
+                new Vector3(
+                  func1Mesh[func1Mesh.length - 1][i + 1].x,
+                  func2Mesh[func2Mesh.length - 1][i].y - func1Mesh[func1Mesh.length - 1][i + 1].y,
+                  func1Mesh[func1Mesh.length - 1][i + 1].z
+                ),
+                new Vector3(func2Mesh[func2Mesh.length - 1][i + 1].x, 0, func2Mesh[func2Mesh.length - 1][i + 1].z),
+                new Vector3(func2Mesh[func2Mesh.length - 1][i].x, 0, func2Mesh[func2Mesh.length - 1][i].z)
+              ]
+            : [
+                new Vector3(
+                  func1Mesh[func1Mesh.length - 1][i + 1].y - func2Mesh[func2Mesh.length - 1][i].y,
+                  func1Mesh[func1Mesh.length - 1][i].x,
+                  func1Mesh[func1Mesh.length - 1][i].z
+                ),
+                new Vector3(
+                  func1Mesh[func1Mesh.length - 1][i + 1].y - func2Mesh[func2Mesh.length - 1][i].y,
+                  func1Mesh[func1Mesh.length - 1][i + 1].x,
+                  func1Mesh[func1Mesh.length - 1][i + 1].z
+                ),
+                new Vector3(0, func2Mesh[func2Mesh.length - 1][i + 1].x, func2Mesh[func2Mesh.length - 1][i + 1].z),
+                new Vector3(0, func2Mesh[func2Mesh.length - 1][i].x, func2Mesh[func2Mesh.length - 1][i].z)
+              ];
       const plane1Pos =
         rotationAxisType() === 'y'
           ? inTermsOf() === 'x'
             ? new Vector3(intervalStart(), rAxis, 0)
             : new Vector3(rAxis, -intervalStart(), 0)
           : inTermsOf() === 'x'
-          ? new Vector3(-rAxis, -func1Mesh[0][0].y, 0)
-          : new Vector3(func1Mesh[0][0].y, -rAxis, 0);
+            ? new Vector3(-rAxis, -func1Mesh[0][0].y, 0)
+            : new Vector3(func1Mesh[0][0].y, -rAxis, 0);
       const plane2Pos =
         rotationAxisType() === 'y'
           ? inTermsOf() === 'x'
             ? new Vector3(intervalEnd(), rAxis, 0)
             : new Vector3(rAxis, -intervalEnd(), 0)
           : inTermsOf() === 'x'
-          ? new Vector3(-rAxis, -func2Mesh[func2Mesh.length - 1][0].y, 0)
-          : new Vector3(func2Mesh[func2Mesh.length - 1][0].y, -rAxis, 0);
+            ? new Vector3(-rAxis, -func2Mesh[func2Mesh.length - 1][0].y, 0)
+            : new Vector3(func2Mesh[func2Mesh.length - 1][0].y, -rAxis, 0);
       const plane1 = new Plane(plane1Pos, plane1Points, color, true, wireframe, true);
       const plane2 = new Plane(plane2Pos, plane2Points, color, true, wireframe, true);
       crossSections.add(plane1);
@@ -728,14 +730,24 @@ const App: Component = () => {
     });
 
     addEventListener('keydown', (e: KeyboardEvent) => {
-      if (!focusing()) {
+      if (controlBtns.includes(e.key)) {
+        controlsHeld++;
+        return;
+      }
+
+      if (!focusing() && controlsHeld === 0) {
         const f = keydownEvents[e.key.toLowerCase() as keyof typeof keydownEvents];
         f && f();
       }
     });
 
     addEventListener('keyup', (e: KeyboardEvent) => {
-      if (!focusing()) {
+      if (controlBtns.includes(e.key)) {
+        controlsHeld--;
+        return;
+      }
+
+      if (!focusing() && controlsHeld === 0) {
         const f = keyupEvents[e.key.toLowerCase() as keyof typeof keyupEvents];
         f && f();
       }
